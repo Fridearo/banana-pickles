@@ -5,6 +5,7 @@ var Schema       = mongoose.Schema;
 
 var ProjectSchema   = new Schema({
 	name: String,
+    user: String,
     date: { type: Date, default: Date.now },
     comments: String,
     

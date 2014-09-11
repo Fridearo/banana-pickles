@@ -5,25 +5,44 @@
 
 var mongoose   = require('mongoose');
 mongoose.connect('mongodb://localhost/api'); // connect to our database
+//var configDB = require('./config/database.js');
+//define api models
 var User     = require('./app/models/user');
 var Receipt     = require('./app/models/receipt');
 var Project     = require('./app/models/project');
-
-
-
-
 // call the packages we need
 var express    = require('express'); 		// call express
 var app        = express(); 				// define our app using express
 var bodyParser = require('body-parser');
 var Grid = require('gridfs-stream');
+var passport = require('passport');
+var flash    = require('connect-flash');
+var morgan       = require('morgan');
+var cookieParser = require('cookie-parser');
+var session      = require('express-session');
+
+var port = process.env.PORT || 8080; 		// set our port
+
+require('./app/config/passport')(passport); // pass passport for configuration
+
+// set up our express application
+	app.use(morgan('dev')); // log every request to the console
+	app.use(cookieParser()); // read cookies (needed for auth)
+	
+	app.set('view engine', 'ejs'); // set up ejs for templating
+
+	// required for passport
+	app.use(session({ secret: 'ilovescotchscotchyscotchscotch' })); // session secret
+	app.use(passport.initialize());
+	app.use(passport.session()); // persistent login sessions
+	app.use(flash()); // use connect-flash for flash messages stored in session
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-var port = process.env.PORT || 8080; 		// set our port
+require('./app/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
 
 // ROUTES FOR OUR API
 // =============================================================================
